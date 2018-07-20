@@ -14,3 +14,22 @@ if [[ -z "${cdResult// }" ]]; then
 else
     echo "No SuchFile"
 fi
+
+
+#remove the space in file name
+#example file name:19-014-0100.mp3 .mp3
+#result file name:19-014-0100.mp3
+$ for file in *.mp3 ;
+do target=`echo "$file" | sed 's/ //g'`;
+echo "$target";
+mv "$file" "$target";
+done;
+
+#remove the duplicate file extension in file name
+#example file name:19-014-0100.mp3.mp3
+#result file name:19-014-0100.mp3
+$ for file in *.mp3 ;
+do target=`echo "$file" | sed 's/\.mp3\.mp3$/.mp3/g'`;
+echo "$target";
+mv "$file" "$target";
+done;

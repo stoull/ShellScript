@@ -1,0 +1,348 @@
+# ffmpeg命令行参数中文详解
+
+目录:
+
+1 前言
+2 命令选项
+2.1 通用选项
+2.2 视频选项
+2.3 高级视频选项
+2.4 音频选项
+2.5 音频/视频捕获选项
+2.6 高级选项
+2.7 常用参数举例
+2.7.1 压缩分辨率
+2.7.2 转码
+2.7.3 截图
+2.7.4 添加水印
+2.7.5 设置264 Profile
+2.7.6 设置SAR, DAR
+2.7.7 设置帧率
+2.7.8 推送rtmp码流
+2.7.9 推送udp码流
+2.7.10 探测视频是逐行还是隔行
+3 参数详解
+3.1 视频
+4 ffprobe常用参数
+5 参考文献
+
+1 前言
+
+本文说描述的选项, 不是每个版本的ffmpeg都具有. 有些选项在不同的版本中有可能会有不同的名称或者表述方式.
+
+2 命令选项
+
+2.1 通用选项
+
+-L license
+
+-h 帮助
+
+-formats 显示可用的文件封装格式, 编解码, 协议等. 其中D为Decode或Demux, E为Encode或者Mux.
+
+-codecs 相对于-formats只显示编解码格式.
+
+-f fmt 强迫采用格式fmt(文件格式, 如wav, avi等). 如果不指定该选项, 则使用文件扩展名来自动探测格式.
+
+-i filename 输入文件
+
+-y 覆盖输出文件
+
+-t duration 设置录制/转码的时长. hh:mm:ss[.xxx]格式的记录时间也支持
+
+-ss position 搜索到指定的起始时间 [-]hh:mm:ss[.xxx]的格式也支持
+
+-title string 设置标题(本人编译的linux版本未带此选项)
+
+-author string 设置本人(本人编译的linux版本未带此选项)
+
+-copyright string 设置版权(本人编译的linux版本未带此选项)
+
+-comment string 设置评论(本人编译的linux版本未带此选项)
+
+-target type 设置目标文件类型(type可以为: vcd, svcd, dvd, "dv", "dv50")所有的格式选项(比特率, 编解码以及缓冲区大小)自动设置, 只需要输入如下的就可以了: ffmpeg -i myfile.avi -target vcd /tmp/vcd.mpg. 另外, type也可以加前缀: "pal-", "ntsc-" or "film-".
+
+-hq 激活高质量设置(本人编译的linux版本未带此选项)
+
+-itsoffset offset 设置以秒为基准的时间偏移, 该选项影响所有后面的输入文件. 该偏移被加到输入文件的时戳, 定义一个正偏移意味着相应的流被延迟了 offset秒. [-]hh:mm:ss[.xxx]的格式也支持
+
+2.2 视频选项
+
+-b:v bitrate 设置比特率, 缺省200kb/s(该数值依据转发的文章, 本人未验证).
+
+-r fps 设置帧率. 缺省25(该数值依据转发的文章, 本人未验证)
+
+-s size 设置帧大小 格式为WXH 缺省160X128. 默认为与源相同大小. 下面的简写也可以直接使用: Sqcif 128X96 qcif 176X144 cif 252X288 4cif 704X576
+
+-aspect aspect 设置横纵比 4:3 16:9 或 1.3333 1.7777
+
+-croptop size 设置顶部切除带大小 像素单位
+
+-cropbottom size -cropleft size -cropright size
+
+-padtop size 设置顶部补齐的大小 像素单位
+
+-padbottom size
+
+-padleft size
+
+-padright size
+
+-padcolor color 设置补齐条颜色(hex,6个16进制的数, 红:绿:兰排列, 比如 000000代表黑色)
+
+-vn 不做视频记录
+
+-bt tolerance 设置视频码率容忍度kbit/s
+
+-maxrate bitrate设置最大视频码率容忍度
+
+-minrate bitreate 设置最小视频码率容忍度
+
+-bufsize size 设置码率控制缓冲区大小
+
+-vcodec codec 强制使用codec编解码方式. 如果用copy表示原始编解码数据必须被拷贝.
+
+-sameq 使用同样视频质量作为源(VBR).
+
+-pass n 选择处理遍数(1或者2). 两遍编码非常有用. 第一遍生成统计信息, 第二遍生成精确的请求的码率
+
+-passlogfile file 选择两遍的纪录文件名为file
+
+2.3 高级视频选项
+
+-g gop_size 设置图像组大小
+
+-intra 仅适用帧内编码
+
+-qscale q 使用固定的视频量化标度(VBR)
+
+-qmin q 最小视频量化标度(VBR)
+
+-qmax q 最大视频量化标度(VBR)
+
+-qdiff q 量化标度间最大偏差 (VBR)
+
+-qblur blur 视频量化标度柔化(VBR)
+
+-qcomp compression 视频量化标度压缩(VBR)
+
+-rc_init_cplx complexity 一遍编码的初始复杂度
+
+-b_qfactor factor 在p和b帧间的qp因子
+
+-i_qfactor factor 在p和i帧间的qp因子
+
+-b_qoffset offset 在p和b帧间的qp偏差
+
+-i_qoffset offset 在p和i帧间的qp偏差
+
+-rc_eq equation 设置码率控制方程 默认tex^qComp
+
+-rc_override override 特定间隔下的速率控制重载
+
+-me method 设置运动估计的方法 可用方法有 zero phods log x1 epzs(缺省) full
+
+-dct_algo algo 设置dct的算法 可用的有 0 FF_DCT_AUTO 缺省的DCT 1 FF_DCT_FASTINT 2 FF_DCT_INT 3 FF_DCT_MMX 4 FF_DCT_MLIB 5 FF_DCT_ALTIVEC
+
+-idct_algo algo 设置idct算法. 可用的有 0 FF_IDCT_AUTO 缺省的IDCT 1 FF_IDCT_INT 2 FF_IDCT_SIMPLE 3 FF_IDCT_SIMPLEMMX 4 FF_IDCT_LIBMPEG2MMX 5 FF_IDCT_PS2 6 FF_IDCT_MLIB 7 FF_IDCT_ARM 8 FF_IDCT_ALTIVEC 9 FF_IDCT_SH4 10 FF_IDCT_SIMPLEARM
+
+-er n 设置错误残留为n 1 FF_ER_CAREFULL 缺省 2 FF_ER_COMPLIANT 3 FF_ER_AGGRESSIVE 4 FF_ER_VERY_AGGRESSIVE
+
+-ec bit_mask 设置错误掩蔽为bit_mask,该值为如下值的位掩码 1 FF_EC_GUESS_MVS (default=enabled) 2 FF_EC_DEBLOCK (default=enabled)
+
+-bf frames 使用frames B 帧, 支持mpeg1,mpeg2,mpeg4
+
+-mbd mode 宏块决策 0 FF_MB_DECISION_SIMPLE 使用mb_cmp 1 FF_MB_DECISION_BITS 2 FF_MB_DECISION_RD
+
+-4mv 使用4个运动矢量 仅用于mpeg4
+
+-part 使用数据划分 仅用于mpeg4
+
+-bug param 绕过没有被自动监测到编码器的问题
+
+-strict strictness 跟标准的严格性
+
+-aic 使能高级帧内编码 h263+
+
+-umv 使能无限运动矢量 h263+
+
+-deinterlace 不采用交织方法
+
+-interlace 强迫交织法编码仅对mpeg2和mpeg4有效. 当你的输入是交织的并且你想要保持交织以最小图像损失的时候采用该选项. 可选的方法是不交织, 但是损失更大
+
+-psnr 计算压缩帧的psnr
+
+-vstats 输出视频编码统计到vstats_hhmmss.log
+
+-vhook module 插入视频处理模块 module 包括了模块名和参数, 用空格分开
+
+2.4 音频选项
+
+-ab bitrate 设置音频码率. 有些版本是(-b:a bitrate)
+
+-ar freq 设置音频采样率
+
+-ac channels 设置通道 缺省为与输入相同.
+
+-an 不使能音频纪录
+
+-acodec codec 使用codec编解码
+
+2.5 音频/视频捕获选项
+
+-vd device 设置视频捕获设备. 比如/dev/video0
+
+-vc channel 设置视频捕获通道 DV1394专用
+
+-tvstd standard 设置电视标准 NTSC PAL(SECAM)
+
+-dv1394 设置DV1394捕获
+
+-av device 设置音频设备 比如/dev/dsp
+
+2.6 高级选项
+
+-map file:stream 设置输入流映射
+
+-debug 打印特定调试信息
+
+-benchmark 为基准测试加入时间
+
+-hex 倾倒每一个输入包
+
+-bitexact 仅使用位精确算法 用于编解码测试
+
+-ps size 设置包大小, 以bits为单位
+
+-re 以本地帧频读数据, 主要用于模拟捕获设备
+
+-loop 循环输入流(只工作于图像流, 用于ffserver测试)
+
+2.7 常用参数举例
+
+2.7.1 压缩分辨率
+
+ffmpeg -i 1080.mp4 -s 1280x720 720.mp4
+2.7.2 转码
+
+ffmpeg -i h265.ts -vcodec h264 -acodec aac -strict -2 h264.mp4
+2.7.3 截图
+
+单张
+
+ffmpeg -ss 00:02:00  -i car_1080.mp4  -vframes 1  -y car_1080.png
+ffmpeg -ss 00:02:00  -i car_1080.mp4  -vframes 1  -y car_1080.jpg
+说明:
+
+-ss: 表示要截取的时间. 注意, 该参数要放在-i前面, 否则如果截取的时间点靠后的话会很慢.
+-vframes: 表示截取的帧数.
+连续多张
+
+ffmpeg -ss 00:02:00  -i car_1080.mp4  -vframes 20 -r 10 -y b-%3d.png
+说明:
+
+-vframes 20: 表示截取20帧.
+-r 10: 表示截取的帧率(帧率10, 即一秒钟的内容, 截取为10张图片). 如果不指定表示按照原视频的帧率.
+b-%3d.jpg: 格式化文件命名,会生成 b-001.jpg，b-002.jpg 等
+2.7.4 添加水印
+
+水印局中:
+
+ffmpeg -i input.mp4 -i watermark.png -filter_complex overlay="(main_w/2)-(overlay_w/2):(main_h/2)-(overlay_h)/2" center.mp4
+ffmpeg -i input.mp4 -i watermark.png -filter_complex overlay="5:5" upper_left.mp4
+说明:
+
+-i input.mp4: 视频源
+-i watermark.png: 水印图片
+overlay: 水印的位置
+center.mp4: 输出文件
+2.7.5 设置264 Profile
+
+-profile:v baseline -level 3.0
+-profile:v baseline -level 3.1
+-profile:v main -level 3.1
+-profile:v main -level 4.0
+-profile:v high -level 4.0
+-profile:v high -level 4.1
+-profile:v high -level 4.2 
+2.7.6 设置SAR, DAR
+
+命令行:
+
+ffmpeg -i infile -vcodec copy -acodec copy -vbsf h264_changesps=arg1arg2[/arg3] outfile
+args can be:
+
+sar=x:y ---- Set sar to x:y, 0:0 will remove sar info
+there are two distinct cases:
+
+sar/dar is stored in container - AFAIK this should work
+sar/dar is stored in bistream  - reencode is needed - though one could need to just replace few bits... 
+2.7.7 设置帧率
+
+ffmpeg -i B.avi -codec:v mpeg4 -r 30 -qscale:v 2 -codec:a copy C.avi
+-codec:v mpeg4 - Use the encoder called mpeg4 for MPEG-4 Part 2 video.
+-r 30 - Set output frame rate as 30.
+-qscale:v 2 - Set video output quality using a constant quantization parameter. Recommended range is 2-5 for mpeg4.
+-codec:a copy - Copy the audio from input to output to avoid re-encoding.
+if you want more presice control, not only control fps. but also tbr, tbn, tbc. assume you understand what mean of it. tbc,tbn,tbr.
+
+check
+
+ffmpeg -x264opts timebase=???
+or
+
+ffmpeg -time_base
+2.7.8 推送rtmp码流
+
+ffmpeg -re -i ./test.flv -acodec copy -vcodec copy -f flv rtmp://localhost/live/test
+2.7.9 推送udp码流
+
+ffmpeg -re -i ./test.ts -c copy -f mpegts -y udp://1.2.3.4:12345
+如果需要指定udp包大小:
+
+ffmpeg -re -i ./test.ts -c copy -f mpegts -y udp://1.2.3.4:12345?pkt_size=1316
+2.7.10 探测视频是逐行还是隔行
+
+ffmpeg -filter:v idet  -frames:v 100  -an -f rawvideo -y /dev/null -i test.ts
+得到如下输出:
+
+[Parsed_idet_0 @ 0x2386bc0] Repeated Fields: Neither:    92 Top:     4 Bottom:     5
+[Parsed_idet_0 @ 0x2386bc0] Single frame detection: TFF:   101 BFF:     0 Progressive:     0 Undetermined:     0
+[Parsed_idet_0 @ 0x2386bc0] Multi frame detection: TFF:   101 BFF:     0 Progressive:     0 Undetermined:     0
+此例检测了100帧, 得到TFF: 101, 说明是隔行(TFF表示隔行的顶场, BFF表示底场, Progressive表示逐行的帧). 如果都是Progressive, 则是逐行.
+
+3 参数详解
+
+3.1 视频
+
+tbn the time base in AVStream that has come from the container. tbn代表文件层(st)的时间精度.
+
+tbc the time base in AVCodecContext for the codec used for a particular stream. tbc代表视频层(st->codec)的时间精度.
+
+tbr tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate. 代表帧率;
+
+4 ffprobe常用参数
+
+-show_data                  show packets data  
+-show_data_hash             show packets data hash  
+-show_error                 show probing error  
+-show_format                show format/container info  
+-show_frames                show frames info  
+-show_format_entry entry    show a particular entry from the format/container info  
+-show_entries entry_list    show a set of specified entries  
+-show_packets               show packets info  
+-show_programs              show programs info  
+-show_streams               show streams info  
+-show_chapters              show chapters info  
+-count_frames               count the number of frames per stream  
+-count_packets              count the number of packets per stream  
+-show_program_version       show ffprobe version  
+-show_library_versions      show library versions  
+-show_versions              show program and library versions  
+-show_pixel_formats         show pixel format descriptions  
+-show_private_data          show private data  
+5 参考文献
+
+转自: http://blog.csdn.net/leixiaohua1020/article/details/12751349 并加入本人的解释.
+
+ffmpeg+libx264: https://trac.ffmpeg.org/wiki/Encode/H.264
