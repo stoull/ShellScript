@@ -1,5 +1,12 @@
 # ffmpeg命令行参数中文详解
 
+原文地址：http://www.mikewootc.com/wiki/sw_develop/multimedia/ffmpeg_app_param.html
+
+将视频转换为音频文件：
+-vn 表示忽略视频
+-ab 比特率为 320k
+ffmpeg -i IMG_8894.mov -vn -ab 320k IMG_8894_320k.m4a
+
 目录:
 
 1 前言
